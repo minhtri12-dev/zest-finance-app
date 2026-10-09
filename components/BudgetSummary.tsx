@@ -1,96 +1,81 @@
 'use client';
 
 import React from 'react';
-import { Bot, BarChart3, TrendingUp, TrendingDown, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, ArrowUpRight, ArrowDownLeft, TrendingUp } from 'lucide-react';
 
 export default function BudgetSummary({
-  totalFilteredExpense,
-  totalFilteredIncome,
-  chartData,
-  maxChartVal,
-  currChartHeight,
-  prevChartHeight,
-  formatMoney,
-  formatShortMoney,
+  totalExpense,
+  totalIncome,
+  monthlyBudget,
+  budgetPercentage,
+  timeFilter,
+  setTimeFilter,
   isPrivacyMode,
   setIsPrivacyMode,
-  monthlyExpense,
-  monthlyBudget,
-  burnRate,
-  dailyLimit,
-  getAiAdvice,
-  isDarkMode
+  formatMoney,
+  isDarkMode,
+  cardBg
 }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div className={`rounded-3xl shadow-sm border p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${isDarkMode ? 'bg-[#191A1C] border-[#2A2D32] hover:border-[#D49A65]/30' : 'bg-white border-[#D0D4DC] hover:border-[#16181A]/30'}`}>
-        <div className="flex justify-between items-start">
+    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+      <div className={`md:col-span-5 border rounded-[2.5rem] p-6 relative overflow-hidden group transition-all ${cardBg}`}>
+        <div className="flex justify-between items-start mb-4">
           <div>
-            <p className="text-[#9EA0A5] text-[10px] font-bold uppercase tracking-wider">Tổng chi (Theo bộ lọc)</p>
-            <p className={`font-extrabold text-2xl md:text-3xl mt-1 tracking-tight ${isDarkMode ? 'text-white' : 'text-[#16181A]'}`}>{formatMoney(totalFilteredExpense)}</p>
-            {totalFilteredIncome > 0 && (
-              <p className="text-xs font-bold text-emerald-500 mt-1">Thu vào: +{formatMoney(totalFilteredIncome)}</p>
-            )}
+            <div className="flex items-center gap-2">
+              <p className="text-[10px] font-bold uppercase tracking-wider opacity-60">Ngân sách tháng</p>
+              <button onClick={() => setIsPrivacyMode(!isPrivacyMode)} className="opacity-50 hover:opacity-100 transition-opacity cursor-pointer" title="Ẩn/Hiện số dư">
+                {isPrivacyMode ? <EyeOff size={13} className="text-[#34d399]" /> : <Eye size={13} />}
+              </button>
+            </div>
+            <h2 className="text-3xl font-extrabold tracking-tight mt-1">{formatMoney(totalExpense)}</h2>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-[#D49A65]/10 flex items-center justify-center text-[#D49A65]">
-            <BarChart3 size={22} />
+          <div className={`flex rounded-full p-1 text-[11px] font-bold border ${isDarkMode ? 'bg-[#1a1a1a] border-white/5' : 'bg-slate-100 border-slate-200'}`}>
+            <button onClick={() => setTimeFilter('today')} className={`px-3 py-1.5 rounded-full transition-all cursor-pointer ${timeFilter === 'today' ? 'bg-[#2a2a2a] text-white' : 'opacity-60'}`}>Hôm nay</button>
+            <button onClick={() => setTimeFilter('month')} className={`px-3 py-1.5 rounded-full transition-all cursor-pointer ${timeFilter === 'month' ? 'bg-[#2a2a2a] text-white' : 'opacity-60'}`}>Tháng này</button>
           </div>
         </div>
+        
+        <p className="text-xs font-medium mb-4 opacity-60">Đã dùng {budgetPercentage}% hạn mức ({formatMoney(monthlyBudget)})</p>
 
-        <div className="mt-6 pt-4 border-t border-dashed flex items-end gap-6 h-32 justify-center border-[#9EA0A5]/20">
-           <div className="flex flex-col items-center gap-2 h-full justify-end w-16 group cursor-pointer">
-              <span className="text-[11px] font-bold text-[#9EA0A5] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">{formatShortMoney(chartData.prev)}</span>
-              <div className={`w-10 rounded-t-md transition-all duration-700 ${isDarkMode ? 'bg-white/10' : 'bg-slate-200'}`} style={{ height: `${prevChartHeight}%` }}></div>
-              <span className="text-[11px] font-bold text-[#9EA0A5] whitespace-nowrap">{chartData.prevLabel}</span>
-           </div>
-           
-           <div className="flex flex-col items-center gap-2 h-full justify-end w-16 group cursor-pointer">
-              <span className={`text-[11px] font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap ${isDarkMode ? 'text-white' : 'text-[#16181A]'}`}>{formatShortMoney(chartData.curr)}</span>
-              <div className={`w-10 rounded-t-md transition-all duration-700 ${chartData.isUp ? 'bg-red-400' : 'bg-emerald-400'}`} style={{ height: `${currChartHeight}%` }}></div>
-              <span className={`text-[11px] font-bold whitespace-nowrap ${isDarkMode ? 'text-white' : 'text-[#16181A]'}`}>{chartData.currLabel}</span>
-           </div>
-        </div>
-
-        <div className="flex items-center justify-center mt-4 text-[11px] font-bold">
-           {chartData.isNeutral ? (
-              <span className="text-slate-500 bg-slate-500/10 px-2.5 py-1.5 rounded-lg border border-slate-500/20">Không biến động (0%)</span>
-           ) : (
-              <span className={`px-2.5 py-1.5 rounded-lg border flex items-center gap-1.5 shadow-sm ${chartData.isUp ? 'text-red-500 bg-red-500/10 border-red-500/20' : 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20'}`}>
-                 {chartData.isUp ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-                 <b>{chartData.percent}%</b> so với {chartData.prevLabel.toLowerCase()}
-              </span>
-           )}
-        </div>
-
-        <div className={`mt-5 pt-3 border-t flex items-center justify-center ${isDarkMode ? 'border-[#2A2D32]' : 'border-[#D0D4DC]'}`}>
-          <button onClick={() => setIsPrivacyMode(!isPrivacyMode)} className={`px-3 py-1.5 border rounded-xl text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer ${isDarkMode ? 'bg-[#16181A] hover:bg-white/10 border-[#2A2D32] text-[#9EA0A5]' : 'bg-[#F4F5F7] hover:bg-[#D0D4DC] border-[#D0D4DC] text-slate-700'}`}>
-            {isPrivacyMode ? <EyeOff size={13} className="text-[#D49A65]" /> : <Eye size={13} className="text-[#D49A65]" />}
-            <span>{isPrivacyMode ? 'Đã ẩn số dư' : 'Ẩn số dư'}</span>
-          </button>
+        <div className="pt-2 flex items-center justify-between">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-[#34d399] bg-[#34d399]/10 px-2.5 py-1 rounded-xl">
+            <TrendingUp size={14} />
+            <span>-4.2% so với tháng trước</span>
+          </div>
+          <div className="w-32 h-8">
+            <svg viewBox="0 0 100 30" className="w-full h-full stroke-[#34d399] fill-none stroke-[2.5]" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M0 25 Q 25 15, 50 18 T 100 5" />
+            </svg>
+          </div>
         </div>
       </div>
 
-      <div className={`md:col-span-2 border rounded-3xl p-6 flex flex-col justify-center gap-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${isDarkMode ? 'bg-[#191A1C] border-[#2A2D32] hover:border-[#D49A65]/30' : 'bg-white border-[#D0D4DC] hover:border-[#16181A]/30'}`}>
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-[#D49A65]/10 border border-[#D49A65]/20 flex items-center justify-center shrink-0 text-[#D49A65]">
-            <Bot size={26} />
-          </div>
-          <div>
-            <p className="text-xs font-extrabold text-[#D49A65] uppercase tracking-wider">Cảnh báo Dòng tiền (Tháng này)</p>
-            <p className={`text-sm mt-1.5 font-medium leading-relaxed ${monthlyExpense >= monthlyBudget ? 'text-red-400 font-bold' : (isDarkMode ? 'text-slate-200' : 'text-slate-700')}`}>
-              {getAiAdvice()}
-            </p>
-          </div>
+      <div className={`md:col-span-3 border rounded-[2.5rem] p-6 relative overflow-hidden group transition-all flex flex-col justify-between ${isDarkMode ? 'bg-gradient-to-br from-[#0f1f1a] to-[#0a0f0d] border-white/5' : 'bg-gradient-to-br from-emerald-50 to-white border-emerald-100 shadow-sm'}`}>
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#34d399]/15 blur-3xl rounded-full"></div>
+        <div className="flex justify-between items-start relative z-10">
+          <p className="text-emerald-500 text-[10px] font-bold uppercase tracking-wider">Tổng Thu nhập</p>
+          <div className="w-8 h-8 rounded-xl bg-[#34d399]/10 flex items-center justify-center text-[#34d399]"><ArrowDownLeft size={16}/></div>
         </div>
-        <div className={`grid grid-cols-2 gap-3 pt-5 border-t ${isDarkMode ? 'border-[#2A2D32]' : 'border-[#D0D4DC]'}`}>
-           <div className={`p-4 rounded-2xl border ${isDarkMode ? 'bg-[#16181A] border-[#2A2D32]' : 'bg-[#F4F5F7] border-[#D0D4DC]'}`}>
-              <p className="text-[11px] font-bold text-[#9EA0A5] mb-1">Tốc độ đốt tiền tháng</p>
-              <p className={`text-base font-extrabold ${isDarkMode ? 'text-white' : 'text-[#16181A]'}`}>{burnRate.toLocaleString('vi-VN')} đ/ngày</p>
-           </div>
-           <div className={`p-4 rounded-2xl border ${isDarkMode ? 'bg-[#16181A] border-[#2A2D32]' : 'bg-[#F4F5F7] border-[#D0D4DC]'}`}>
-              <p className="text-[11px] font-bold text-[#9EA0A5] mb-1">Ngưỡng an toàn ngày</p>
-              <p className={`text-base font-extrabold ${isDarkMode ? 'text-white' : 'text-[#16181A]'}`}>{dailyLimit.toLocaleString('vi-VN')} đ/ngày</p>
-           </div>
+        <div className="relative z-10 my-4">
+          <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">{formatMoney(totalIncome)}</h2>
+        </div>
+        <div className="flex justify-between items-center text-[11px] relative z-10 pt-4 border-t opacity-80">
+          <span className="font-bold text-emerald-500">Dòng tiền ổn định</span>
+          <span className="text-[#34d399] bg-[#34d399]/10 px-2 py-0.5 rounded-md font-bold">Active</span>
+        </div>
+      </div>
+
+      <div className={`md:col-span-4 border rounded-[2.5rem] p-6 relative group transition-all flex flex-col justify-between ${cardBg}`}>
+        <div className="flex justify-between items-start">
+          <p className="text-[10px] font-bold uppercase tracking-wider opacity-60">Tổng Chi tiêu</p>
+          <div className="w-8 h-8 rounded-xl bg-slate-500/10 flex items-center justify-center opacity-70"><ArrowUpRight size={16}/></div>
+        </div>
+        <div className="my-4">
+          <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">{formatMoney(totalExpense)}</h2>
+        </div>
+        <div className="flex justify-between items-center text-[11px] pt-4 border-t opacity-70">
+          <span className="font-medium">Hạn mức an toàn ngày</span>
+          <span className="text-[#38bdf8] font-bold">{formatMoney(Math.round(monthlyBudget / 30))}</span>
         </div>
       </div>
     </div>
