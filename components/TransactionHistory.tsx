@@ -15,8 +15,7 @@ export default function TransactionHistory({
   deleteTransaction,
   exportPdfReport,
   cardBg,
-  inputBg,
-  isDarkMode
+  inputBg
 }) {
   return (
     <div className={`border rounded-[2.5rem] p-6 ${cardBg}`}>
@@ -37,7 +36,7 @@ export default function TransactionHistory({
               className={`text-xs pl-8 pr-3 py-2 rounded-xl outline-none focus:ring-1 focus:ring-[#34d399] font-medium w-full sm:w-44 border ${inputBg}`} 
             />
           </div>
-          <button onClick={exportPdfReport} className={`px-3.5 py-2 border rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${isDarkMode ? 'bg-[#1a1a1a] hover:bg-[#252525] border-white/5 text-zinc-300' : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700'}`}>
+          <button onClick={exportPdfReport} className="px-3.5 py-2 border border-white/10 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer bg-black/40 hover:bg-black/60">
             <Printer size={13}/> Xuất PDF
           </button>
         </div>

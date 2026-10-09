@@ -7,6 +7,7 @@ import { User, ShieldAlert, CheckCircle2, RotateCcw, Edit3 } from 'lucide-react'
 import Header from '@/components/Header';
 import BudgetSummary from '@/components/BudgetSummary';
 import TransactionForm from '@/components/TransactionForm';
+import BackdatedForm from '@/components/BackdatedForm';
 import AnalyticsMatrix from '@/components/AnalyticsMatrix';
 import SavingsGoals from '@/components/SavingsGoals';
 import DebtManager from '@/components/DebtManager';
@@ -72,9 +73,13 @@ export default function ZestFinDashboard() {
   const [timeFilter, setTimeFilter] = useState('month');
   
   const [monthlyBudget, setMonthlyBudget] = useState(25000000);
+  const [targetEssential, setTargetEssential] = useState(12500000);
+  const [targetLifestyle, setTargetLifestyle] = useState(7500000);
+  const [targetSavings, setTargetSavings] = useState(5000000);
+
   const [toastMessage, setToastMessage] = useState(null);
   const [isPrivacyMode, setIsPrivacyMode] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [currentTheme, setCurrentTheme] = useState('neon');
 
   const [editingTx, setEditingTx] = useState(null);
   const [editNote, setEditNote] = useState('');
@@ -95,7 +100,11 @@ export default function ZestFinDashboard() {
     const savedTx = localStorage.getItem('zest_fin_transactions');
     const savedDebts = localStorage.getItem('zest_fin_debts');
     const savedGoals = localStorage.getItem('zest_fin_goals');
-    const savedTheme = localStorage.getItem('zest_fin_dark_mode');
+    const savedTheme = localStorage.getItem('zest_fin_theme');
+    const savedBudget = localStorage.getItem('zest_fin_monthly_budget');
+    const savedEst = localStorage.getItem('zest_fin_est');
+    const savedLife = localStorage.getItem('zest_fin_life');
+    const savedSav = localStorage.getItem('zest_fin_sav');
 
     if (savedUser) { 
       setUserName(savedUser); 
@@ -111,14 +120,22 @@ export default function ZestFinDashboard() {
     if (savedGoals) {
       try { setGoals(JSON.parse(savedGoals)); } catch (e) {}
     }
-    if (savedTheme !== null) setIsDarkMode(savedTheme === 'true');
+    if (savedTheme) setCurrentTheme(savedTheme);
+    if (savedBudget) setMonthlyBudget(parseInt(savedBudget, 10));
+    if (savedEst) setTargetEssential(parseInt(savedEst, 10));
+    if (savedLife) setTargetLifestyle(parseInt(savedLife, 10));
+    if (savedSav) setTargetSavings(parseInt(savedSav, 10));
   }, []);
 
   useEffect(() => { if (userName) localStorage.setItem('zest_fin_username', userName); }, [userName]);
   useEffect(() => { localStorage.setItem('zest_fin_transactions', JSON.stringify(transactions)); }, [transactions]);
   useEffect(() => { localStorage.setItem('zest_fin_debts', JSON.stringify(debts)); }, [debts]);
   useEffect(() => { localStorage.setItem('zest_fin_goals', JSON.stringify(goals)); }, [goals]);
-  useEffect(() => { localStorage.setItem('zest_fin_dark_mode', isDarkMode.toString()); }, [isDarkMode]);
+  useEffect(() => { localStorage.setItem('zest_fin_theme', currentTheme); }, [currentTheme]);
+  useEffect(() => { localStorage.setItem('zest_fin_monthly_budget', monthlyBudget.toString()); }, [monthlyBudget]);
+  useEffect(() => { localStorage.setItem('zest_fin_est', targetEssential.toString()); }, [targetEssential]);
+  useEffect(() => { localStorage.setItem('zest_fin_life', targetLifestyle.toString()); }, [targetLifestyle]);
+  useEffect(() => { localStorage.setItem('zest_fin_sav', targetSavings.toString()); }, [targetSavings]);
 
   const showToast = (msg, canUndo = false) => {
     setToastMessage(msg);
@@ -166,7 +183,7 @@ export default function ZestFinDashboard() {
     } catch (e) { setIsListening(false); }
   };
 
-  const parseAndAddTransaction = (rawText, explicitAmount = null) => {
+  const parseAndAddTransaction = (rawText, explicitAmount = null, targetDateStr = null) => {
     if (!rawText.trim()) return;
     const text = rawText.toLowerCase();
     const amount = explicitAmount !== null ? explicitAmount : parseAmountSmart(rawText);
@@ -188,17 +205,15 @@ export default function ZestFinDashboard() {
       category = 'Giải trí';
     }
 
-    const now = new Date();
+    const txDate = targetDateStr ? new Date(targetDateStr) : new Date();
     const newTx = {
       id: Date.now(), note: rawText, amount, category, type,
-      date: now.toISOString(), dateStr: now.toLocaleDateString('vi-VN'), time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      date: txDate.toISOString(), dateStr: txDate.toLocaleDateString('vi-VN'), time: txDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
     setTransactions([newTx, ...transactions]);
     setInputText('');
     showToast(type === 'income' ? `Đã nhận: +${amount.toLocaleString('vi-VN')}đ` : `Đã chi: -${amount.toLocaleString('vi-VN')}đ`);
   };
-
-  const handleAiSubmit = (e) => { e.preventDefault(); parseAndAddTransaction(inputText); };
 
   const deleteTransaction = (id) => {
     const target = transactions.find(tx => tx.id === id);
@@ -281,16 +296,23 @@ export default function ZestFinDashboard() {
   const monthlyExpense = currentMonthTransactions.filter(tx => tx.type === 'expense' || !tx.type).reduce((s, tx) => s + tx.amount, 0);
   const essentialSpend = currentMonthTransactions.filter(tx => (tx.category === 'Ăn uống' || tx.category === 'Di chuyển') && (tx.type === 'expense' || !tx.type)).reduce((s, tx) => s + tx.amount, 0);
   const lifestyleSpend = currentMonthTransactions.filter(tx => (tx.category === 'Mua sắm' || tx.category === 'Giải trí') && (tx.type === 'expense' || !tx.type)).reduce((s, tx) => s + tx.amount, 0);
-  
-  const targetEssential = monthlyBudget * 0.5;
-  const targetLifestyle = monthlyBudget * 0.3;
-  const targetSavings = monthlyBudget * 0.2;
 
   const formatMoney = (amt) => isPrivacyMode ? '******** đ' : `${amt.toLocaleString('vi-VN')} đ`;
 
-  const bgMain = isDarkMode ? 'bg-[#060606] text-zinc-100' : 'bg-[#f8fafc] text-slate-800';
-  const cardBg = isDarkMode ? 'bg-[#121212] border-white/5' : 'bg-white border-slate-200 shadow-sm';
-  const inputBg = isDarkMode ? 'bg-[#1a1a1a] border-white/5 text-white placeholder-zinc-600' : 'bg-slate-100 border-slate-200 text-slate-800 placeholder-slate-400';
+  const bgMain = 
+    currentTheme === 'midnight' ? 'bg-[#060b19] text-slate-100' :
+    currentTheme === 'mono' ? 'bg-[#000000] text-zinc-100' :
+    'bg-[#060606] text-zinc-100';
+
+  const cardBg = 
+    currentTheme === 'midnight' ? 'bg-[#0f172a] border-white/10' :
+    currentTheme === 'mono' ? 'bg-[#121212] border-white/20' :
+    'bg-[#121212] border-white/5';
+
+  const inputBg = 
+    currentTheme === 'midnight' ? 'bg-[#1e293b] border-white/10 text-white placeholder-slate-400' :
+    currentTheme === 'mono' ? 'bg-[#181818] border-white/20 text-white placeholder-zinc-500' :
+    'bg-[#1a1a1a] border-white/5 text-white placeholder-zinc-600';
 
   if (!isLoggedIn) {
     return (
@@ -320,7 +342,7 @@ export default function ZestFinDashboard() {
                   type="text" 
                   value={tempNameInput} 
                   onChange={(e) => setTempNameInput(e.target.value)} 
-                  placeholder="Vui Lòng Nhập Tên..." 
+                  placeholder="Nhập tên định danh của bạn..." 
                   disabled={isLoggingIn}
                   required 
                   className="w-full bg-[#181818] border border-white/5 text-sm pl-11 pr-4 py-4 rounded-2xl outline-none focus:ring-1 focus:ring-[#34d399] text-white placeholder-zinc-600 font-medium transition-all" 
@@ -364,16 +386,16 @@ export default function ZestFinDashboard() {
 
       {editingTx && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className={`border rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 ${isDarkMode ? 'bg-[#141414] border-white/10 text-white' : 'bg-white border-slate-200 text-slate-800'}`}>
+          <div className="border rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 bg-[#141414] border-white/10 text-white">
             <h3 className="text-sm font-bold flex items-center gap-2"><Edit3 size={16} className="text-[#34d399]" /> Chỉnh sửa giao dịch</h3>
             <form onSubmit={saveEditedTransaction} className="space-y-3">
               <div>
                 <label className="text-xs font-medium mb-1 block opacity-75">Nội dung</label>
-                <input type="text" value={editNote} onChange={(e) => setEditNote(e.target.value)} required className={`w-full text-xs p-3.5 rounded-xl outline-none border focus:ring-1 focus:ring-[#34d399] ${isDarkMode ? 'bg-[#1c1c1c] border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'}`} />
+                <input type="text" value={editNote} onChange={(e) => setEditNote(e.target.value)} required className="w-full text-xs p-3.5 rounded-xl outline-none border focus:ring-1 focus:ring-[#34d399] bg-[#1c1c1c] border-white/10 text-white" />
               </div>
               <div>
                 <label className="text-xs font-medium mb-1 block opacity-75">Số tiền</label>
-                <input type="text" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} required className={`w-full text-xs p-3.5 rounded-xl outline-none border focus:ring-1 focus:ring-[#34d399] ${isDarkMode ? 'bg-[#1c1c1c] border-white/10 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'}`} />
+                <input type="text" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} required className="w-full text-xs p-3.5 rounded-xl outline-none border focus:ring-1 focus:ring-[#34d399] bg-[#1c1c1c] border-white/10 text-white" />
               </div>
               <div className="flex justify-end gap-2 pt-2">
                 <button type="button" onClick={() => setEditingTx(null)} className="px-4 py-2 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20">Hủy</button>
@@ -387,8 +409,8 @@ export default function ZestFinDashboard() {
       <Header 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
-        isDarkMode={isDarkMode} 
-        setIsDarkMode={setIsDarkMode} 
+        currentTheme={currentTheme} 
+        setCurrentTheme={setCurrentTheme} 
         userName={userName} 
         handleLogout={handleLogout} 
       />
@@ -401,41 +423,54 @@ export default function ZestFinDashboard() {
               totalExpense={totalExpense}
               totalIncome={totalIncome}
               monthlyBudget={monthlyBudget}
+              setMonthlyBudget={setMonthlyBudget}
               budgetPercentage={budgetPercentage}
               timeFilter={timeFilter}
               setTimeFilter={setTimeFilter}
               isPrivacyMode={isPrivacyMode}
               setIsPrivacyMode={setIsPrivacyMode}
               formatMoney={formatMoney}
-              isDarkMode={isDarkMode}
               cardBg={cardBg}
             />
 
-            <TransactionForm 
-              inputText={inputText}
-              setInputText={setInputText}
-              isListening={isListening}
-              toggleSpeechRecognition={toggleSpeechRecognition}
-              handleAiSubmit={handleAiSubmit}
-              parseAndAddTransaction={parseAndAddTransaction}
-              monthlyExpense={monthlyExpense}
-              monthlyBudget={monthlyBudget}
-              formatMoney={formatMoney}
-              isDarkMode={isDarkMode}
-              cardBg={cardBg}
-              inputBg={inputBg}
-            />
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <div className="lg:col-span-7">
+                <TransactionForm 
+                  inputText={inputText}
+                  setInputText={setInputText}
+                  isListening={isListening}
+                  toggleSpeechRecognition={toggleSpeechRecognition}
+                  parseAndAddTransaction={parseAndAddTransaction}
+                  monthlyExpense={monthlyExpense}
+                  monthlyBudget={monthlyBudget}
+                  formatMoney={formatMoney}
+                  cardBg={cardBg}
+                  inputBg={inputBg}
+                />
+              </div>
+              <div className="lg:col-span-5">
+                <BackdatedForm 
+                  parseAndAddTransaction={parseAndAddTransaction}
+                  cardBg={cardBg}
+                  inputBg={inputBg}
+                />
+              </div>
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               <div className="lg:col-span-6">
                 <AnalyticsMatrix 
                   targetEssential={targetEssential}
-                  essentialSpend={essentialSpend}
+                  setTargetEssential={setTargetEssential}
                   targetLifestyle={targetLifestyle}
-                  lifestyleSpend={lifestyleSpend}
+                  setTargetLifestyle={setTargetLifestyle}
                   targetSavings={targetSavings}
+                  setTargetSavings={setTargetSavings}
+                  essentialSpend={essentialSpend}
+                  lifestyleSpend={lifestyleSpend}
                   formatMoney={formatMoney}
                   cardBg={cardBg}
+                  inputBg={inputBg}
                 />
               </div>
               <div className="lg:col-span-6">
@@ -449,7 +484,6 @@ export default function ZestFinDashboard() {
                   depositGoal={depositGoal}
                   deleteGoal={deleteGoal}
                   formatMoney={formatMoney}
-                  isDarkMode={isDarkMode}
                   cardBg={cardBg}
                   inputBg={inputBg}
                 />
@@ -470,7 +504,6 @@ export default function ZestFinDashboard() {
                   toggleDebtStatus={toggleDebtStatus}
                   deleteDebt={deleteDebt}
                   formatMoney={formatMoney}
-                  isDarkMode={isDarkMode}
                   cardBg={cardBg}
                   inputBg={inputBg}
                 />
@@ -490,7 +523,6 @@ export default function ZestFinDashboard() {
               exportPdfReport={exportPdfReport}
               cardBg={cardBg}
               inputBg={inputBg}
-              isDarkMode={isDarkMode}
             />
           </>
         )}
@@ -507,7 +539,6 @@ export default function ZestFinDashboard() {
               depositGoal={depositGoal}
               deleteGoal={deleteGoal}
               formatMoney={formatMoney}
-              isDarkMode={isDarkMode}
               cardBg={cardBg}
               inputBg={inputBg}
             />
@@ -523,7 +554,6 @@ export default function ZestFinDashboard() {
               toggleDebtStatus={toggleDebtStatus}
               deleteDebt={deleteDebt}
               formatMoney={formatMoney}
-              isDarkMode={isDarkMode}
               cardBg={cardBg}
               inputBg={inputBg}
             />
@@ -536,23 +566,27 @@ export default function ZestFinDashboard() {
               totalExpense={totalExpense}
               totalIncome={totalIncome}
               monthlyBudget={monthlyBudget}
+              setMonthlyBudget={setMonthlyBudget}
               budgetPercentage={budgetPercentage}
               timeFilter={timeFilter}
               setTimeFilter={setTimeFilter}
               isPrivacyMode={isPrivacyMode}
               setIsPrivacyMode={setIsPrivacyMode}
               formatMoney={formatMoney}
-              isDarkMode={isDarkMode}
               cardBg={cardBg}
             />
             <AnalyticsMatrix 
               targetEssential={targetEssential}
-              essentialSpend={essentialSpend}
+              setTargetEssential={setTargetEssential}
               targetLifestyle={targetLifestyle}
-              lifestyleSpend={lifestyleSpend}
+              setTargetLifestyle={setTargetLifestyle}
               targetSavings={targetSavings}
+              setTargetSavings={setTargetSavings}
+              essentialSpend={essentialSpend}
+              lifestyleSpend={lifestyleSpend}
               formatMoney={formatMoney}
               cardBg={cardBg}
+              inputBg={inputBg}
             />
           </div>
         )}
@@ -572,7 +606,6 @@ export default function ZestFinDashboard() {
               exportPdfReport={exportPdfReport}
               cardBg={cardBg}
               inputBg={inputBg}
-              isDarkMode={isDarkMode}
             />
           </div>
         )}

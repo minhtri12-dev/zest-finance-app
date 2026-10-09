@@ -12,10 +12,9 @@ export default function SavingsGoals({
   handleAddGoal,
   depositGoal,
   deleteGoal,
-  formatMoney,
-  isDarkMode,
-  cardBg,
-  inputBg
+  formatMoney = (v) => v,
+  cardBg = '',
+  inputBg = ''
 }) {
   return (
     <div className={`border rounded-[2.5rem] p-6 space-y-4 ${cardBg}`}>
@@ -43,7 +42,7 @@ export default function SavingsGoals({
           {goals.map(g => {
             const percent = Math.min(Math.round((g.current / g.target) * 100), 100);
             return (
-              <div key={g.id} className={`p-3.5 border rounded-2xl space-y-2 ${isDarkMode ? 'bg-[#1a1a1a] border-white/5' : 'bg-slate-50 border-slate-200'}`}>
+              <div key={g.id} className="p-3.5 border border-white/10 rounded-2xl space-y-2 bg-black/20">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-bold">{g.name}</p>

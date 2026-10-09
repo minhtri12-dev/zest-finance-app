@@ -15,7 +15,6 @@ export default function DebtManager({
   toggleDebtStatus,
   deleteDebt,
   formatMoney = (v) => v,
-  isDarkMode = true,
   cardBg = '',
   inputBg = ''
 }) {
@@ -44,7 +43,7 @@ export default function DebtManager({
       {debts && debts.length > 0 && (
         <div className="space-y-2 max-h-44 overflow-y-auto pr-1">
           {debts.map(d => (
-            <div key={d.id} className={`p-3 border rounded-2xl flex items-center justify-between ${isDarkMode ? 'bg-[#1a1a1a] border-white/5' : 'bg-slate-50 border-slate-200'}`}>
+            <div key={d.id} className="p-3 border border-white/10 rounded-2xl flex items-center justify-between bg-black/20">
               <div>
                 <p className="text-xs font-bold">{d.person}</p>
                 <p className="text-[10px] opacity-70 font-medium"><span className={d.status === 'paid' ? 'text-[#34d399]' : 'text-amber-500'}>{d.status === 'paid' ? 'Đã thanh toán' : 'Đang chờ'}</span></p>
