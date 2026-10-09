@@ -24,7 +24,7 @@ export default function DebtManager({
       <div className="flex items-center justify-between pb-3 border-b opacity-90">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl bg-[#f59e0b]/10 flex items-center justify-center text-[#f59e0b]"><BarChart3 size={16}/></div>
-          <h3 className="text-xs font-extrabold uppercase tracking-wider">Giao dịch định kỳ & Công nợ</h3>
+          <h3 className="text-xs font-extrabold uppercase tracking-wider">Giao dịch định kỳ</h3>
         </div>
       </div>
 

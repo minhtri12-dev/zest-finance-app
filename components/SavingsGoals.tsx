@@ -22,13 +22,13 @@ export default function SavingsGoals({
       <div className="flex items-center justify-between pb-3 border-b opacity-90">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl bg-[#34d399]/10 flex items-center justify-center text-[#34d399]"><Target size={16}/></div>
-          <h3 className="text-xs font-extrabold uppercase tracking-wider">Mục tiêu tiết kiệm & Heo đất</h3>
+          <h3 className="text-xs font-extrabold uppercase tracking-wider">Mục tiêu tiết kiệm</h3>
         </div>
       </div>
 
       <form onSubmit={handleAddGoal} className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end">
         <div className="sm:col-span-5">
-          <input type="text" value={goalName} onChange={(e) => setGoalName(e.target.value)} placeholder="Tên mục tiêu (VD: Mua xe)..." required className={`w-full text-xs p-3 rounded-xl outline-none border focus:ring-1 focus:ring-[#34d399] ${inputBg}`} />
+          <input type="text" value={goalName} onChange={(e) => setGoalName(e.target.value)} placeholder="Tên mục tiêu..." required className={`w-full text-xs p-3 rounded-xl outline-none border focus:ring-1 focus:ring-[#34d399] ${inputBg}`} />
         </div>
         <div className="sm:col-span-4">
           <input type="text" value={goalTarget} onChange={(e) => setGoalTarget(e.target.value)} placeholder="Số tiền mục tiêu..." required className={`w-full text-xs p-3 rounded-xl outline-none border focus:ring-1 focus:ring-[#34d399] ${inputBg}`} />

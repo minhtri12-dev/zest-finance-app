@@ -37,7 +37,7 @@ export default function TransactionForm({
               type="text"
               value={inputText} 
               onChange={(e) => setInputText(e.target.value)}
-              placeholder={isListening ? "Đang lắng nghe giọng nói..." : "Nhập nhanh (VD: Mua cafe 45k, tiền nhà 4tr)..."}
+              placeholder={isListening ? "Đang lắng nghe giọng nói..." : "Nhập số tiền..."}
               className={`w-full rounded-2xl p-4 pr-12 text-xs md:text-sm outline-none focus:ring-1 focus:ring-[#34d399] transition-all font-medium border ${inputBg}`}
             />
             <button type="button" onClick={toggleSpeechRecognition} className={`absolute right-3.5 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-colors cursor-pointer ${isListening ? 'text-red-400 bg-red-500/10 animate-pulse' : 'opacity-60 hover:opacity-100'}`} title="Bấm để nói">

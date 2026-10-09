@@ -137,7 +137,7 @@ export default function ZestFinDashboard() {
         setIsLoggingIn(false);
         showToast(`Chào mừng trở lại, ${tempNameInput.trim()}!`);
       }, 50);
-    }, 600);
+    }, 700);
   };
 
   const handleLogout = () => {
@@ -288,27 +288,30 @@ export default function ZestFinDashboard() {
 
   const formatMoney = (amt) => isPrivacyMode ? '******** đ' : `${amt.toLocaleString('vi-VN')} đ`;
 
-  const bgMain = isDarkMode ? 'bg-[#0a0a0a] text-zinc-100' : 'bg-[#f8fafc] text-slate-800';
+  const bgMain = isDarkMode ? 'bg-[#060606] text-zinc-100' : 'bg-[#f8fafc] text-slate-800';
   const cardBg = isDarkMode ? 'bg-[#121212] border-white/5' : 'bg-white border-slate-200 shadow-sm';
   const inputBg = isDarkMode ? 'bg-[#1a1a1a] border-white/5 text-white placeholder-zinc-600' : 'bg-slate-100 border-slate-200 text-slate-800 placeholder-slate-400';
 
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4 relative overflow-hidden font-sans">
+      <div className="min-h-screen bg-[#060606] flex items-center justify-center p-4 relative overflow-hidden font-sans">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#34d399]/10 blur-[120px] rounded-full"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#38bdf8]/10 blur-[120px] rounded-full"></div>
+          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-[#34d399]/10 blur-[150px] rounded-full animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#38bdf8]/10 blur-[150px] rounded-full animate-pulse"></div>
         </div>
 
-        <div className={`w-full max-w-sm transition-all duration-500 ease-out ${isLoggingIn ? 'opacity-0 scale-95 translate-y-3' : 'opacity-100 scale-100'}`}>
-          <div className="bg-[#111111]/90 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-8 shadow-2xl flex flex-col items-center">
+        <div className={`w-full max-w-md transition-all duration-700 ease-out ${isLoggingIn ? 'opacity-0 scale-95 translate-y-4 blur-sm' : 'opacity-100 scale-100 translate-y-0'}`}>
+          <div className="bg-[#101010]/90 backdrop-blur-3xl border border-white/10 rounded-[3rem] p-10 shadow-[0_0_80px_rgba(0,0,0,0.9)] flex flex-col items-center relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#34d399]/50 to-transparent"></div>
             
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#d4f900] to-[#34d399] flex items-center justify-center shadow-[0_0_30px_rgba(52,211,153,0.3)] mb-6">
-              <span className="text-[#0a0a0a] font-extrabold text-2xl tracking-tighter">ZF</span>
+            <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[#d4f900] to-[#34d399] flex items-center justify-center shadow-[0_0_40px_rgba(52,211,153,0.4)] mb-6 transform hover:scale-105 transition-transform">
+              <span className="text-[#060606] font-extrabold text-3xl tracking-tighter">ZF</span>
             </div>
 
-            <h1 className="text-2xl font-bold text-white tracking-tight mb-1">ZestFin Finance</h1>
-            <p className="text-xs text-zinc-400 mb-8 text-center font-medium">Hệ thống quản trị tài chính cá nhân cao cấp.</p>
+            <h1 className="text-3xl font-extrabold text-white tracking-tight mb-2">ZestFin Finance</h1>
+            <p className="text-xs text-zinc-500 mb-8 text-center italic max-w-[280px] leading-relaxed">
+              &ldquo;Tài chính vững vàng là nền tảng của mọi sự tự do đích thực.&rdquo;
+            </p>
 
             <form onSubmit={handleLoginSubmit} className="w-full space-y-4">
               <div className="relative">
@@ -317,25 +320,29 @@ export default function ZestFinDashboard() {
                   type="text" 
                   value={tempNameInput} 
                   onChange={(e) => setTempNameInput(e.target.value)} 
-                  placeholder="Nhập tên của bạn (VD: Trí)..." 
+                  placeholder="Vui Lòng Nhập Tên..." 
                   disabled={isLoggingIn}
                   required 
-                  className="w-full bg-[#1a1a1a] border border-white/5 text-sm pl-11 pr-4 py-3.5 rounded-2xl outline-none focus:ring-1 focus:ring-[#34d399] text-white placeholder-zinc-600 font-medium transition-all" 
+                  className="w-full bg-[#181818] border border-white/5 text-sm pl-11 pr-4 py-4 rounded-2xl outline-none focus:ring-1 focus:ring-[#34d399] text-white placeholder-zinc-600 font-medium transition-all" 
                 />
               </div>
               <button 
                 type="submit" 
                 disabled={isLoggingIn}
-                className="w-full py-4 bg-gradient-to-r from-[#d4f900] to-[#34d399] text-[#0a0a0a] hover:opacity-90 rounded-2xl text-xs font-extrabold transition-all flex justify-center items-center gap-2 shadow-lg cursor-pointer"
+                className="w-full py-4 bg-gradient-to-r from-[#d4f900] to-[#34d399] text-[#060606] hover:opacity-95 rounded-2xl text-xs font-extrabold transition-all flex justify-center items-center gap-2 shadow-[0_0_25px_rgba(52,211,153,0.3)] cursor-pointer tracking-wider uppercase"
               >
                 {isLoggingIn ? (
-                  <><span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></span> Đang xác thực...</>
+                  <><span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></span> Đang khởi tạo phiên...</>
                 ) : (
                   'Truy cập Hệ thống'
                 )}
               </button>
             </form>
-            <p className="text-[10px] text-zinc-600 mt-6 flex items-center gap-1.5"><ShieldAlert size={12}/> LocalStorage Encrypted Security</p>
+
+            <div className="mt-8 pt-6 border-t border-white/5 w-full flex justify-between items-center text-[10px] text-zinc-600 font-semibold uppercase tracking-wider">
+              <span className="flex items-center gap-1.5"><ShieldAlert size={12}/> Secure Vault</span>
+              <span className="text-[#34d399]">● Live Node</span>
+            </div>
           </div>
         </div>
       </div>
@@ -343,7 +350,7 @@ export default function ZestFinDashboard() {
   }
 
   return (
-    <div className={`min-h-screen ${bgMain} ${plusJakarta.className} transition-opacity duration-500 ease-in-out ${isDashboardVisible ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`min-h-screen ${bgMain} ${plusJakarta.className} transition-opacity duration-700 ease-in-out ${isDashboardVisible ? 'opacity-100' : 'opacity-0'}`}>
       
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-[#161616] text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-white/10 animate-bounce">
